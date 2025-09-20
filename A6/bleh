@@ -1,1 +1,364 @@
+import numpy as np
 
+inv_a = [225, 215, 250, 225, 205]
+inv_b = [220, 225, 250, 250, 210]
+
+i = 0.0433
+pv_a , pv_b = 0,0
+
+
+for j in range(len(inv_a)):
+    pv_a = pv_a + inv_a[j]*np.exp(-i*(j+1))
+    pv_b = pv_b + inv_b[j]*np.exp(-i*(j+1))
+
+if pv_a < pv_b:
+    print(f"Investment A is better - present value {pv_a:.4f} which is lower than {pv_b:.4f}")
+else:
+    print(f"Investment B is better - the present value is {pv_b:.4f} which is lower than {pv_a:.4f}")
+
+
+
+####3
+
+import math
+
+payment = [460, 235, 640, 370, 330, 250]
+i = 0.045
+p = 4        #compounding
+pv = 0
+
+for j in range(len(payment)):
+    pv = pv + payment[j]*(1+i/p)**(-p*(j+1))
+
+print(f'Present value = {pv:.4f}')
+
+###4
+
+import math
+
+s0 = 40 
+i = 0.1
+T = 1
+
+# Forward price
+F0 = s0*math.exp(i*T)
+print(f'The forward price should be = {F0:.4f} and the initial value of the forward contrat = {0}')
+
+#b
+
+t = 0.5
+s0_new = 45
+F0_new = s0_new*math.exp(i*0.5)
+f_val = s0_new - F0*math.exp(-i*(T-t))
+print(f'The forward price should be = {F0_new:.4f} and the initial value of the forward contrat = {f_val:.4f}')
+
+
+###55555
+
+import matplotlib.pyplot as plt
+import numpy as np
+
+k = 150
+p = 5
+sT = np.linspace(100, 200, num = 500)
+
+def long_call(sT, k):
+    return np.maximum(sT - k, 0)
+def long_put(sT, k):
+    return np.maximum(k - sT, 0)
+
+fig, ax = plt.subplots(1, 2, figsize =(14,6))
+strategies = [
+    ('long call', long_call(sT,k), 'blue'),
+    ('long put',  long_put(sT,k), 'red'),
+    ('short call', -long_call(sT,k),'orange'),
+    ('short put', -long_put(sT,k), 'green'),
+]
+
+for name, payoff, color in strategies:
+    ax[0].plot(sT, payoff, label = name, linewidth = 2, color = color)
+ax[0].axvline(x=k, color = 'gray', linestyle = '--', label =f'Strike k = {150}')
+ax[0].set_xlabel('Stock price')
+ax[0].set_ylabel('Payoff')
+ax[0].set_title('Payoff diagram', fontweight = 'bold', fontsize = 10)
+ax[0].legend()
+ax[0].grid()
+
+for name, payoff, color in strategies: 
+    if 'long' in name:
+        profit = payoff -5
+    else:
+        profit = payoff + 5
+    ax[1].plot(sT, profit, label = name, color = color)
+ax[1].axvline(x=k, color = 'gray', linestyle = '--', label =f'Strike k = {150}')
+ax[1].set_xlabel('Stock price')
+ax[1].set_ylabel('Profit')
+ax[1].set_title('Profit diagram', fontweight = 'bold', fontsize = 10)
+ax[1].legend()
+ax[1].grid()
+plt.show()
+
+
+#####666666
+import numpy as np
+import matplotlib.pyplot as plt 
+
+sT = np.linspace(30, 60, num = 200)
+k_p = 40
+k_c = 45
+
+def long_call(sT,k):
+    return np.maximum(sT - k, 0) -3
+def long_put(sT,k):
+    return np.maximum(k - sT, 0) -4
+
+profit = long_call(sT, k_c) + long_put(sT, k_p)
+plt.plot(sT, profit, label = 'profit', linewidth = 1.2, color = 'blue')
+plt.axvline(x = k_p, label = 'call strike', color = 'gray', linestyle = '--')
+plt.axvline(x = k_c, label = 'call strike', color = 'red', linestyle = '--')
+plt.plot(sT, long_call(sT,k_c), color ='orange', label = 'long call')
+plt.plot(sT, long_put(sT,k_p), color = 'green', label = 'long put')
+plt.xlabel('Asset price')
+plt.ylabel('Profit')
+plt.title('Variation of profit with stock price')
+plt.grid()
+plt.legend()
+plt.show()
+
+
+#####777777
+
+import numpy as np
+
+# Given data
+S = 19           # Stock price
+C = 1            # Call option price
+K = 20           # Strike price
+r = 0.03         # Risk-free rate (annual, continuous compounding)
+T = 4/12         # Time to maturity in years
+
+# Calculate discounted strike price
+discounted_strike = K * np.exp(-r * T)
+
+# Calculate put price using put-call parity
+P = C + discounted_strike - S
+
+print(f"Price of the European put option: ${P:.2f}")
+
+
+
+#### 9
+
+
+import numpy as np
+from scipy.stats import norm
+
+# Given values
+S = 30          # Stock price
+K = 29          # Strike price
+r = 0.05        # Risk-free rate
+sigma = 0.25    # Volatility
+T = 4 / 12      # Time to maturity in years
+
+# d1 and d2 for Black-Scholes
+d1 = (np.log(S / K) + (r + 0.5 * sigma**2) * T) / (sigma * np.sqrt(T))
+d2 = d1 - sigma * np.sqrt(T)
+
+# European call price
+call_price = S * norm.cdf(d1) - K * np.exp(-r * T) * norm.cdf(d2)
+
+# European put price
+put_price = K * np.exp(-r * T) * norm.cdf(-d2) - S * norm.cdf(-d1)
+
+# American call price (same as European for non-dividend-paying stocks)
+american_call_price = call_price
+
+# Check put-call parity
+lhs = call_price + K * np.exp(-r * T)
+rhs = put_price + S
+put_call_parity_holds = np.isclose(lhs, rhs)
+
+# Output
+print(f"(a) European Call Price: {call_price:.4f}")
+print(f"(b) American Call Price: {american_call_price:.4f}")
+print(f"(c) European Put Price: {put_price:.4f}")
+print(f"(d) Put-Call Parity Holds: {put_call_parity_holds}")
+print(f"    LHS (C + K*e^(-rT)) = {lhs:.4f}")
+print(f"    RHS (P + S)         = {rhs:.4f}")
+
+
+###### 10000000000\
+
+import numpy as np
+import math
+
+def futures_call_binomial():
+    # Parameters
+    S0 = 60         # Current futures price
+    K = 60          # Strike price
+    r = 0.08        # Risk-free rate
+    q = 0           # No dividend yield for futures
+    sigma = 0.30    # Volatility
+    T = 6/12        # Time to expiration (6 months)
+    n = 2           # Number of periods
+    
+    dt = T / n      # Time step
+    
+    # Calculate u, d, and p
+    u = math.exp(sigma * math.sqrt(dt))
+    d = 1 / u
+    p = (math.exp((r - q) * dt) - d) / (u - d)
+    discount = math.exp(-r * dt)
+    
+    print(f"Parameters: u={u:.4f}, d={d:.4f}, p={p:.4f}")
+    print(f"dt={dt:.4f}, discount={discount:.4f}")
+    print()
+    
+    # Initialize futures price tree
+    futures_prices = np.zeros((n+1, n+1))
+    european_values = np.zeros((n+1, n+1))
+    american_values = np.zeros((n+1, n+1))
+    
+    # Calculate futures prices at each node
+    for i in range(n+1):
+        for j in range(i+1):
+            futures_prices[i][j] = S0 * (u ** (i-j)) * (d ** j)
+    
+    # Calculate option values at expiration (final column)
+    for j in range(n+1):
+        payoff = max(futures_prices[n][j] - K, 0)  # Call option payoff
+        european_values[n][j] = payoff
+        american_values[n][j] = payoff
+    
+    # Work backwards for European option
+    for i in range(n-1, -1, -1):
+        for j in range(i+1):
+            european_values[i][j] = discount * (p * european_values[i+1][j] + 
+                                              (1-p) * european_values[i+1][j+1])
+    
+    # Work backwards for American option
+    for i in range(n-1, -1, -1):
+        for j in range(i+1):
+            # European value (discounted expected value)
+            hold_value = discount * (p * american_values[i+1][j] + 
+                                   (1-p) * american_values[i+1][j+1])
+            # Intrinsic value (early exercise)
+            exercise_value = max(futures_prices[i][j] - K, 0)
+            # American option value is max of both
+            american_values[i][j] = max(hold_value, exercise_value)
+    
+    # Print the tree structure
+    print("Futures Price Tree:")
+    for i in range(n+1):
+        row = []
+        for j in range(i+1):
+            row.append(f"{futures_prices[i][j]:.2f}")
+        print(f"Period {i}: {row}")
+    
+    print("\nEuropean Call Value Tree:")
+    for i in range(n+1):
+        row = []
+        for j in range(i+1):
+            row.append(f"{european_values[i][j]:.2f}")
+        print(f"Period {i}: {row}")
+    
+    print("\nAmerican Call Value Tree:")
+    for i in range(n+1):
+        row = []
+        for j in range(i+1):
+            row.append(f"{american_values[i][j]:.2f}")
+        print(f"Period {i}: {row}")
+    
+    # Check for early exercise
+    early_exercise_nodes = []
+    for i in range(n):
+        for j in range(i+1):
+            hold_value = discount * (p * american_values[i+1][j] + 
+                                   (1-p) * american_values[i+1][j+1])
+            exercise_value = max(futures_prices[i][j] - K, 0)
+            if exercise_value > hold_value and exercise_value > 0:
+                early_exercise_nodes.append((i, j))
+    
+    print(f"\nEuropean Call Option Value: ${european_values[0][0]:.2f}")
+    print(f"American Call Option Value: ${american_values[0][0]:.2f}")
+    
+    if early_exercise_nodes:
+        print(f"\nEarly exercise is optimal at nodes: {early_exercise_nodes}")
+        print("Yes, the American call would be worth exercising early.")
+    else:
+        print("\nNo early exercise is optimal at any node.")
+        print("No, the American call would NOT be worth exercising early.")
+    
+    return european_values[0][0], american_values[0][0]
+
+# Run the calculation
+european_value, american_value = futures_call_binomial()
+
+
+######1111
+
+import numpy as np
+import math
+
+def american_put_binomial():
+    # Parameters
+    S0 = 484        # Current stock price
+    K = 480         # Strike price
+    r = 0.10        # Risk-free rate
+    q = 0.03        # Dividend yield
+    sigma = 0.25    # Volatility
+    T = 2/12        # Time to expiration (2 months)
+    n = 4           # Number of periods
+    
+    dt = T / n      # Time step
+    
+    # Calculate u, d, and p
+    u = math.exp(sigma * math.sqrt(dt))
+    d = 1 / u
+    p = (math.exp((r - q) * dt) - d) / (u - d)
+    discount = math.exp(-r * dt)
+    
+    # Initialize stock price tree
+    stock_prices = np.zeros((n+1, n+1))
+    option_values = np.zeros((n+1, n+1))
+    
+    # Calculate stock prices at each node
+    for i in range(n+1):
+        for j in range(i+1):
+            stock_prices[i][j] = S0 * (u ** (i-j)) * (d ** j)
+    # Calculate option values at expiration (final column)
+    for j in range(n+1):
+        option_values[n][j] = max(K - stock_prices[n][j], 0)
+    # Work backwards through the tree
+    for i in range(n-1, -1, -1):
+        for j in range(i+1):
+            # European value (discounted expected value)
+            european_value = discount * (p * option_values[i+1][j] + 
+                                       (1-p) * option_values[i+1][j+1])
+            # Intrinsic value (early exercise)
+            intrinsic_value = max(K - stock_prices[i][j], 0)
+            # American option value is max of both
+            option_values[i][j] = max(european_value, intrinsic_value)
+    
+
+    # Print the tree structure
+    print("Stock Price Tree:")
+    for i in range(n+1):
+        row = []
+        for j in range(i+1):
+            row.append(f"{stock_prices[i][j]:.2f}")
+        print(f"Period {i}: {row}")
+    
+    print("\nOption Value Tree:")
+    for i in range(n+1):
+        row = []
+        for j in range(i+1):
+            row.append(f"{option_values[i][j]:.2f}")
+        print(f"Period {i}: {row}")
+    
+    print(f"\nAmerican Put Option Value: ${option_values[0][0]:.2f}")
+    
+    return option_values[0][0]
+
+# Run the calculation
+american_put_binomial()
